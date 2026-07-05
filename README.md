@@ -15,7 +15,7 @@ Apple guidance used for this workflow:
 
 Singapore transit routing app. The icon combines a bold `CC` monogram, Singapore red/white, CityCommuter route blue, and real SF Symbols for transit cues.
 
-![CityCommuter icon](CityCommuterIcon/SingaporeTransitClean/SourceLayers/CityCommuter-SingaporeTransitClean-IconComposer-iOS-macOS-Default-1024.png)
+<img src="CityCommuterIcon/SingaporeTransitClean/SourceLayers/CityCommuter-SingaporeTransitClean-IconComposer-iOS-macOS-Default-1024.png" alt="CityCommuter icon" width="220">
 
 Files:
 
@@ -33,7 +33,7 @@ Notes:
 
 English practice app inspired by the Muay Thai teep. The icon uses a bold `ST` monogram on a white base with Thailand flag colors.
 
-![ShadowTeep icon](ShadowTeepIcon/ThailandFlagWhite/SourceLayers/ShadowTeep-ThaiWhite-IconComposer-iOS-macOS-Default-1024.png)
+<img src="ShadowTeepIcon/ThailandFlagWhite/SourceLayers/ShadowTeep-ThaiWhite-IconComposer-iOS-macOS-Default-1024.png" alt="ShadowTeep icon" width="220">
 
 Files:
 
