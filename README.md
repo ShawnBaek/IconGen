@@ -2,7 +2,12 @@
 
 Typography-first Apple app icon experiments for iOS, macOS, and watchOS.
 
-This repo keeps the source layers, Icon Composer exports, and resized PNG sets for side-project app icons. The current strongest designs are CityCommuter and ShadowTeep.
+This repo keeps the source layers, Icon Composer files/exports, and resized PNG sets for side-project app icons. The current strongest designs are CityCommuter and ShadowTeep.
+
+Apple guidance used for this workflow:
+
+- [Creating your app icon using Icon Composer](https://developer.apple.com/documentation/xcode/creating-your-app-icon-using-icon-composer)
+- [Configuring your app icon using an asset catalog](https://developer.apple.com/documentation/xcode/configuring-your-app-icon)
 
 ## Showcase
 
@@ -65,9 +70,11 @@ NativeMobileIcon/
 Each finished variant should keep:
 
 - Source PNG layers in `SourceLayers/`
+- Saved Icon Composer `.icon` document in `SourceLayers/` whenever possible
 - iOS/macOS Icon Composer master PNG in `SourceLayers/*-IconComposer-iOS-macOS-Default-1024.png`
 - watchOS Icon Composer master PNG in `SourceLayers/*-IconComposer-watchOS-Default-1088.png`
-- Optional saved `.icon` document in the same `SourceLayers/` folder
+
+For modern Xcode projects, the `.icon` document is the preferred production handoff. The PNG masters remain useful for visual review, README showcase images, fallback asset catalogs, and generating resized PNG sets.
 
 Current saved `.icon` document:
 
@@ -85,9 +92,11 @@ Current best Icon Composer PNG masters:
 3. Add one or two concept cues with restrained color.
 4. Generate 1024 x 1024 PNG source layers.
 5. Import layers into Apple Icon Composer.
-6. Preview iOS/macOS and watchOS.
-7. Export Icon Composer masters.
-8. Generate resized PNGs from the final 1024 master.
-9. Verify with a contact sheet at 16, 32, 64, 128, and 256 px.
+6. Save a `.icon` document when possible.
+7. Preview iOS/macOS, watchOS, and appearance variants.
+8. Export Icon Composer masters.
+9. Generate resized PNGs from the final 1024 master.
+10. Verify with a contact sheet at 16, 32, 64, 128, and 256 px.
+11. Add the `.icon` file to Xcode and verify in Simulator or on device when working inside an app project.
 
 See `Agent.md` for the detailed future-session rules and tool notes.

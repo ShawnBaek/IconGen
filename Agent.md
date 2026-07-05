@@ -8,8 +8,9 @@ Create polished iOS, macOS, and watchOS app icons with a typography-first Apple 
 
 - Strong monogram or short wordmark, usually SF Pro Display Black/Bold.
 - Concept-aware color palette from the app, country, domain, or brand.
-- Layered source PNGs that can be imported into Apple Icon Composer.
-- Final Icon Composer exports for iOS/macOS and watchOS.
+- Layered source artwork that can be imported into Apple Icon Composer.
+- Saved `.icon` files as the preferred Xcode handoff when possible.
+- Final Icon Composer preview/export PNGs for iOS/macOS and watchOS.
 - Resized PNG sets generated only from the approved Icon Composer master.
 
 Best examples in this repo:
@@ -29,6 +30,7 @@ Use these tools in this order.
    - Generate precise 1024 x 1024 transparent PNG layers.
    - Resize final masters into AppIcon sizes.
    - Build contact sheets for small-size visual QA.
+   - PNG is acceptable for this typography workflow; use SVG for scalable vector source when a design starts in a vector editor.
 
 3. AppKit / PyObjC
    - Render real SF Symbols when the design needs Apple system symbols.
@@ -48,6 +50,7 @@ Use these tools in this order.
 6. Icon Composer
    - App path: `/Applications/Icon Composer.app`
    - Use it for final Liquid Glass preview and export.
+   - Save a `.icon` file for the target project whenever the save flow is reliable.
    - Export static PNG masters:
      - iOS/macOS: `1024pt 1x`
      - watchOS: `1088pt 1x`
@@ -71,6 +74,9 @@ Use these tools in this order.
 - Verify at 16, 32, 64, 128, and 256 px before calling it done.
 - If Icon Composer creates noisy/jittery edges, turn off Liquid Glass effects for that specific layer.
 - Keep the final master export and the raw source layers. Do not only keep resized outputs.
+- Prefer a saved `.icon` file as the production artifact for modern Xcode projects. Keep PNG masters for review, README showcase, App Store handoff checks, and fallback asset catalogs.
+- Do not export a canvas mask into Icon Composer; Apple applies the icon crop automatically.
+- Keep imported layers numbered from back to front so Icon Composer's alphabetical ordering stays predictable.
 
 ## Folder Structure
 
@@ -86,9 +92,9 @@ AppNameIcon/
       04-symbols.png
       05-type.png
       06-glass-highlights.png
+      AppName-Variant.icon
       AppName-Variant-IconComposer-iOS-macOS-Default-1024.png
       AppName-Variant-IconComposer-watchOS-Default-1088.png
-      AppName-Variant.icon            # optional, when saved from Icon Composer
     Exports/
       AppName-Variant-preview-1024.png
       AppName-Variant-IconComposer-contact-sheet.png
@@ -102,7 +108,23 @@ AppNameIcon/
         ...
 ```
 
-If a `.icon` package is not saved, the canonical Icon Composer artifacts are the exported PNG masters named `*-IconComposer-*.png`.
+The `.icon` file is the preferred production handoff for Xcode. If a `.icon` package is not saved, the canonical review artifacts are the exported PNG masters named `*-IconComposer-*.png`.
+
+## Apple Xcode Guidance
+
+Apple's current app icon documentation changes how to think about final delivery:
+
+- Icon Composer creates a single multilayer `.icon` file that Xcode can use for iOS, iPadOS, macOS, watchOS, and App Store icon rendering.
+- Add the `.icon` file to the Xcode project bundle before building. In the target's General pane, the App Icon field must match the `.icon` filename without the extension.
+- In current Xcode, an Icon Composer file can replace an existing `AppIcon` asset catalog for the app icon. Xcode can generate similar-looking assets for older OS releases from the `.icon` file. If an app must keep its previous icon on older OS releases, continue using asset catalogs.
+- Use Icon Composer's Document inspector to hide platforms the app does not support. For this repo, usually keep iOS/macOS and watchOS; disable unrelated platforms.
+- Icon Composer previews platform and appearance variants: iOS/macOS Default, Dark, Mono, clear/tinted options, and watchOS. Always inspect the variants that the app will ship.
+- Organize imported artwork into no more than four groups where possible. Groups are the depth layers the system renders.
+- For source artwork from vector tools, prefer SVG. Convert text to outlines because SVG does not preserve fonts. For this repo's generated typography PNG layers, keep the Python source script so the type remains reproducible.
+- Remove baked blurs, shadows, translucency, background gradients, and similar effects before importing when possible; apply those effects in Icon Composer where they can be previewed with Liquid Glass.
+- For non-Icon-Composer fallback asset catalogs, Xcode can generate many icon variations from a single high-resolution image for iOS, iPadOS, tvOS, and watchOS. macOS app icon sets still need explicit sizes when using an asset catalog.
+- iOS and iPadOS asset catalogs support Light, Dark, and Tinted icon appearances. Tinted icons should be grayscale; dark icons should use transparent backgrounds so the system background can show through.
+- Always test the icon in Simulator or on a real device for the supported platforms and appearances.
 
 ## Workflow
 
@@ -122,6 +144,8 @@ If a `.icon` package is not saved, the canonical Icon Composer artifacts are the
    - Use AppKit/PyObjC for SF Symbols.
    - Use SF fonts for typography.
    - Save all layer PNGs at 1024 x 1024.
+   - If using SVG source from a vector tool, convert text to outlines before import.
+   - Keep source effects minimal; let Icon Composer handle Liquid Glass, shadow, opacity, translucency, and appearance variations where possible.
 
 4. Make a raw preview
    - Composite the source layers into `Exports/*-preview-1024.png`.
@@ -140,7 +164,11 @@ If a `.icon` package is not saved, the canonical Icon Composer artifacts are the
      - highlights last
 
 6. Tune Icon Composer
+   - Save the document as `SourceLayers/AppName-Variant.icon`.
+   - Use the Document inspector to keep only the supported platforms visible.
+   - Organize layers into meaningful groups, with a practical maximum of four groups.
    - Check iOS/macOS and watchOS preview.
+   - Check Default, Dark, and Mono appearances for iOS/macOS when applicable.
    - Keep Liquid Glass on layers where it adds depth.
    - Disable Liquid Glass on flat flag/ribbon layers if it creates edge jitter.
    - Inspect the small preview chips at the bottom of Icon Composer.
@@ -162,6 +190,7 @@ If a `.icon` package is not saved, the canonical Icon Composer artifacts are the
    - View the contact sheet.
    - Confirm the icon reads at 32 px and 64 px.
    - Confirm no unwanted edge artifacts after Icon Composer export.
+   - Add the `.icon` file to an Xcode target when possible and test in Simulator or on device.
 
 ## Current Best Icons
 
@@ -207,12 +236,21 @@ Key files:
 
 ## Icon Composer Notes
 
-- Save `.icon` packages when possible, ideally beside source layers:
+- Save `.icon` packages whenever possible, ideally beside source layers:
   - `SourceLayers/AppName-Variant.icon`
-- If the save flow is unreliable, do not block the work. The exported Icon Composer PNG masters are the dependable deliverables.
+- The `.icon` package is the production handoff for modern Xcode projects.
+- If the save flow is unreliable, do not block the work. Exported Icon Composer PNG masters remain the dependable visual deliverables and fallback source for resized PNG sets.
 - The current repo contains a saved `.icon` package for Native Mobile:
   - `NativeMobileIcon/ProjectThemeWhiteAccent/SourceLayers/Native Mobile.icon`
 - CityCommuter and ShadowTeep are currently represented by source layers plus Icon Composer exported PNG masters.
+
+## Xcode Handoff Checklist
+
+- Add the saved `.icon` file to the Xcode project.
+- In target settings, open General -> App Icons and Launch Screen.
+- Set App Icon to the `.icon` filename without `.icon`.
+- If the project still uses an asset catalog fallback, add the 1024 px master or explicit sizes as required by the target platform.
+- Run on Simulator or device and verify Default, Dark, Mono/tinted, and watchOS appearances as applicable.
 
 ## Known Issues And Fixes
 
