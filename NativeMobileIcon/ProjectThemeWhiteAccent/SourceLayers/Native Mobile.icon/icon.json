@@ -1,0 +1,41 @@
+{
+  "fill" : {
+    "automatic-gradient" : "extended-srgb:0.00000,0.53333,1.00000,1.00000"
+  },
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "image-name" : "04-NM-type.png",
+          "name" : "04-NM-type"
+        },
+        {
+          "image-name" : "03-project-theme-highlight.png",
+          "name" : "03-project-theme-highlight"
+        },
+        {
+          "image-name" : "02-project-theme-shadow.png",
+          "name" : "02-project-theme-shadow"
+        },
+        {
+          "image-name" : "01-background.png",
+          "name" : "01-background"
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.6
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.2
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}
