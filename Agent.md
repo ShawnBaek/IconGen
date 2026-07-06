@@ -75,6 +75,7 @@ Use these tools in this order.
 - If Icon Composer creates noisy/jittery edges, turn off Liquid Glass effects for that specific layer.
 - Keep the final master export and the raw source layers. Do not only keep resized outputs.
 - Prefer a saved `.icon` file as the production artifact for modern Xcode projects. Keep PNG masters for review, README showcase, App Store handoff checks, and fallback asset catalogs.
+- App Store 1024 PNGs must be fully opaque. Flatten onto the intended background and remove the alpha channel before App Store or asset-catalog handoff.
 - Do not export a canvas mask into Icon Composer; Apple applies the icon crop automatically.
 - Keep imported layers numbered from back to front so Icon Composer's alphabetical ordering stays predictable.
 
@@ -123,6 +124,7 @@ Apple's current app icon documentation changes how to think about final delivery
 - For source artwork from vector tools, prefer SVG. Convert text to outlines because SVG does not preserve fonts. For this repo's generated typography PNG layers, keep the Python source script so the type remains reproducible.
 - Remove baked blurs, shadows, translucency, background gradients, and similar effects before importing when possible; apply those effects in Icon Composer where they can be previewed with Liquid Glass.
 - For non-Icon-Composer fallback asset catalogs, Xcode can generate many icon variations from a single high-resolution image for iOS, iPadOS, tvOS, and watchOS. macOS app icon sets still need explicit sizes when using an asset catalog.
+- App Store 1024 PNG artwork must not contain transparency. Use an RGB/sRGB, fully opaque 1024 x 1024 PNG with the background already flattened into the image.
 - iOS and iPadOS asset catalogs support Light, Dark, and Tinted icon appearances. Tinted icons should be grayscale; dark icons should use transparent backgrounds so the system background can show through.
 - Always test the icon in Simulator or on a real device for the supported platforms and appearances.
 
@@ -178,12 +180,14 @@ Apple's current app icon documentation changes how to think about final delivery
    - Export iOS/macOS `Default` at `1024pt 1x`.
    - Export watchOS `Default` at `1088pt 1x`.
    - Save beside source layers with explicit names.
+   - For any App Store or fallback asset-catalog `1024.png`, flatten onto a solid background and remove alpha. Do not submit transparent PNGs to App Store Connect.
 
 8. Resize from final master
    - Use the Icon Composer 1024 iOS/macOS PNG as the resize source.
    - Standard sizes:
      - `16, 20, 29, 32, 40, 58, 60, 64, 76, 80, 87, 120, 128, 152, 167, 180, 256, 512, 1024`
    - Save into `Exports/IconComposerSized/`.
+   - If the resize source has alpha, create a separate flattened opaque App Store PNG instead of reusing the transparent master.
 
 9. Verify
    - Verify image dimensions with Pillow.
@@ -250,6 +254,7 @@ Key files:
 - In target settings, open General -> App Icons and Launch Screen.
 - Set App Icon to the `.icon` filename without `.icon`.
 - If the project still uses an asset catalog fallback, add the 1024 px master or explicit sizes as required by the target platform.
+- For App Store Connect, provide a 1024 x 1024 opaque PNG: no alpha channel and no transparent pixels.
 - Run on Simulator or device and verify Default, Dark, Mono/tinted, and watchOS appearances as applicable.
 
 ## Known Issues And Fixes
