@@ -1,4 +1,5 @@
 from pathlib import Path
+from io import BytesIO
 
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
@@ -89,7 +90,76 @@ def hope_accent_layer():
     return glow
 
 
-def document_layer():
+def sf_symbol_image(symbol_name, size):
+    try:
+        import AppKit
+    except Exception:
+        return None
+
+    symbol = AppKit.NSImage.imageWithSystemSymbolName_accessibilityDescription_(symbol_name, None)
+    if symbol is None:
+        return None
+
+    symbol.setSize_((size, size))
+    data = symbol.TIFFRepresentation()
+    if data is None:
+        return None
+
+    return Image.open(BytesIO(bytes(data))).convert("RGBA")
+
+
+def tint_symbol(symbol, color):
+    alpha = symbol.getchannel("A")
+    tinted = Image.new("RGBA", symbol.size, color)
+    tinted.putalpha(alpha)
+    return tinted
+
+
+def symbol_document_layer():
+    symbol = sf_symbol_image("doc.text.fill", 620)
+    if symbol is None:
+        return fallback_document_layer()
+
+    bbox = symbol.getbbox()
+    if bbox is None:
+        return fallback_document_layer()
+
+    symbol = symbol.crop(bbox)
+    target_h = 660
+    target_w = int(symbol.width * (target_h / symbol.height))
+    if target_w > 590:
+        target_w = 590
+        target_h = int(symbol.height * (target_w / symbol.width))
+    symbol = symbol.resize((target_w, target_h), Image.Resampling.LANCZOS)
+    symbol = tint_symbol(symbol, (255, 255, 255, 238))
+    symbol_alpha = symbol.getchannel("A")
+    outline_alpha = symbol_alpha.filter(ImageFilter.MaxFilter(13))
+    outline_alpha = ImageChops.subtract(outline_alpha, symbol_alpha).filter(ImageFilter.GaussianBlur(0.8))
+    outline = Image.new("RGBA", symbol.size, (198, 215, 242, 170))
+    outline.putalpha(outline_alpha)
+
+    layer = new_layer()
+    draw = ImageDraw.Draw(layer, "RGBA")
+
+    shadow = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
+    shadow_draw = ImageDraw.Draw(shadow, "RGBA")
+    x = (SIZE - symbol.width) // 2
+    y = 158
+    shadow_draw.rounded_rectangle((x + 12, y + 18, x + symbol.width - 12, y + symbol.height - 8), radius=58, fill=(11, 34, 74, 44))
+    shadow = ImageChops.offset(shadow, 0, 18).filter(ImageFilter.GaussianBlur(18))
+    layer.alpha_composite(shadow)
+
+    layer.alpha_composite(outline, (x, y))
+    layer.alpha_composite(symbol, (x, y))
+
+    # Quiet Apple-blue text lines inside the SF Symbol document.
+    for line_y, width, alpha in ((336, 278, 92), (386, 332, 78), (436, 244, 66)):
+        draw.rounded_rectangle((346, line_y, 346 + width, line_y + 18), radius=9, fill=(36, 107, 254, alpha))
+
+    return layer
+
+
+def fallback_document_layer():
     layer = new_layer()
     draw = ImageDraw.Draw(layer, "RGBA")
 
@@ -218,7 +288,7 @@ def main():
     layers = [
         ("01-white-hope-background.png", background_layer()),
         ("02-sunrise-hope-accent.png", hope_accent_layer()),
-        ("03-tailored-cv-document.png", document_layer()),
+        ("03-sf-doc-text-symbol.png", symbol_document_layer()),
         ("04-CV-type-shadow.png", type_shadow_layer(mask)),
         ("05-CV-typography.png", type_layer(mask)),
         ("06-glass-highlights.png", glass_highlights_layer(mask)),

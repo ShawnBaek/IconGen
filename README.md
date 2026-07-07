@@ -44,7 +44,7 @@ Files:
 
 ### TailrCV
 
-macOS CV generation app for job seekers. The icon uses a bold `CV` monogram, a tailored document shape, professional navy/blue, and a sunrise amber accent for hope.
+macOS CV generation app for job seekers. The icon uses a bold `CV` monogram, the `doc.text.fill` SF Symbol, professional navy/blue, and a sunrise amber accent for hope.
 
 <img src="TailrCVIcon/HopeWhite/SourceLayers/TailrCV-HopeWhite-IconComposer-iOS-macOS-Default-1024.png" alt="TailrCV icon" width="220">
 

@@ -249,7 +249,7 @@ Design:
 - Background: white with a subtle blue/amber wash
 - Hope color: sunrise amber `#FFB540`
 - Trust/professional color: blue `#246BFE` and navy ink
-- Concept cue: tailored document page with a fold, plus a sunrise base for optimism.
+- Concept cue: real SF Symbol `doc.text.fill` as the CV document, plus a sunrise base for optimism.
 - App Store note: the 1024 PNG is intentionally RGB/opaque with no alpha.
 
 Key files:
