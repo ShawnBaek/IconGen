@@ -50,7 +50,11 @@ macOS CV generation app for job seekers. The icon uses a bold `CV` monogram, the
 
 Files:
 
+- Icon Composer package: `TailrCVIcon/HopeWhite/SourceLayers/TailrCV-HopeWhite.icon`
 - iOS/macOS master: `TailrCVIcon/HopeWhite/SourceLayers/TailrCV-HopeWhite-IconComposer-iOS-macOS-Default-1024.png`
+- Dark appearance: `TailrCVIcon/HopeWhite/Exports/AppearanceVariants/TailrCV-HopeWhite-IconComposer-iOS-macOS-Dark-1024.png`
+- Mono appearance: `TailrCVIcon/HopeWhite/Exports/AppearanceVariants/TailrCV-HopeWhite-IconComposer-iOS-macOS-Mono-1024.png`
+- Tinted grayscale source: `TailrCVIcon/HopeWhite/Exports/AppearanceVariants/TailrCV-HopeWhite-IconComposer-iOS-macOS-Tinted-Grayscale-1024.png`
 - App Store opaque PNG: `TailrCVIcon/HopeWhite/SourceLayers/TailrCV-HopeWhite-AppStore-1024-opaque.png`
 - watchOS master: `TailrCVIcon/HopeWhite/SourceLayers/TailrCV-HopeWhite-IconComposer-watchOS-Default-1088.png`
 - Contact sheet: `TailrCVIcon/HopeWhite/Exports/TailrCV-HopeWhite-contact-sheet.png`
@@ -79,6 +83,7 @@ TailrCVIcon/
     Exports/
       IconComposerSized/
       RawSized/
+      AppearanceVariants/
 NativeMobileIcon/
   ProjectThemeWhiteAccent/
     SourceLayers/
@@ -99,6 +104,7 @@ For modern Xcode projects, the `.icon` document is the preferred production hand
 Current saved `.icon` document:
 
 - `NativeMobileIcon/ProjectThemeWhiteAccent/SourceLayers/Native Mobile.icon`
+- `TailrCVIcon/HopeWhite/SourceLayers/TailrCV-HopeWhite.icon`
 
 Current best Icon Composer PNG masters:
 

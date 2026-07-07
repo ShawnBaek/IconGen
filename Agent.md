@@ -251,11 +251,17 @@ Design:
 - Trust/professional color: blue `#246BFE` and navy ink
 - Concept cue: real SF Symbol `doc.text.fill` as the CV document, plus a sunrise base for optimism.
 - App Store note: the 1024 PNG is intentionally RGB/opaque with no alpha.
+- Appearance support: Default, Dark, Mono, and Tinted-Grayscale preview masters are generated in `Exports/AppearanceVariants/`.
+- Icon Composer package: `TailrCV-HopeWhite.icon` is generated and verified with `ictool`; use Icon Composer's inspector for final per-appearance Liquid Glass tuning.
 
 Key files:
 
 - Source layers: `TailrCVIcon/HopeWhite/SourceLayers/`
+- Icon Composer package: `TailrCVIcon/HopeWhite/SourceLayers/TailrCV-HopeWhite.icon`
 - iOS/macOS master: `TailrCVIcon/HopeWhite/SourceLayers/TailrCV-HopeWhite-IconComposer-iOS-macOS-Default-1024.png`
+- Dark appearance: `TailrCVIcon/HopeWhite/Exports/AppearanceVariants/TailrCV-HopeWhite-IconComposer-iOS-macOS-Dark-1024.png`
+- Mono appearance: `TailrCVIcon/HopeWhite/Exports/AppearanceVariants/TailrCV-HopeWhite-IconComposer-iOS-macOS-Mono-1024.png`
+- Tinted grayscale source: `TailrCVIcon/HopeWhite/Exports/AppearanceVariants/TailrCV-HopeWhite-IconComposer-iOS-macOS-Tinted-Grayscale-1024.png`
 - App Store opaque PNG: `TailrCVIcon/HopeWhite/SourceLayers/TailrCV-HopeWhite-AppStore-1024-opaque.png`
 - watchOS master: `TailrCVIcon/HopeWhite/SourceLayers/TailrCV-HopeWhite-IconComposer-watchOS-Default-1088.png`
 - Contact sheet: `TailrCVIcon/HopeWhite/Exports/TailrCV-HopeWhite-contact-sheet.png`
@@ -269,6 +275,8 @@ Key files:
 - If the save flow is unreliable, do not block the work. Exported Icon Composer PNG masters remain the dependable visual deliverables and fallback source for resized PNG sets.
 - The current repo contains a saved `.icon` package for Native Mobile:
   - `NativeMobileIcon/ProjectThemeWhiteAccent/SourceLayers/Native Mobile.icon`
+- TailrCV also contains a generated `.icon` package verified with `ictool`:
+  - `TailrCVIcon/HopeWhite/SourceLayers/TailrCV-HopeWhite.icon`
 - CityCommuter and ShadowTeep are currently represented by source layers plus Icon Composer exported PNG masters.
 
 ## Xcode Handoff Checklist

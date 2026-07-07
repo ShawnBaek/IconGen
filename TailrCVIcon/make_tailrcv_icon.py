@@ -1,5 +1,7 @@
 from pathlib import Path
 from io import BytesIO
+import json
+import shutil
 
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
@@ -10,8 +12,10 @@ SOURCE = VARIANT / "SourceLayers"
 EXPORTS = VARIANT / "Exports"
 ICON_SIZED = EXPORTS / "IconComposerSized"
 RAW_SIZED = EXPORTS / "RawSized"
+APPEARANCE = EXPORTS / "AppearanceVariants"
+ICON_PACKAGE = SOURCE / "TailrCV-HopeWhite.icon"
 
-for directory in (SOURCE, EXPORTS, ICON_SIZED, RAW_SIZED):
+for directory in (SOURCE, EXPORTS, ICON_SIZED, RAW_SIZED, APPEARANCE):
     directory.mkdir(parents=True, exist_ok=True)
 
 SIZE = 1024
@@ -33,6 +37,8 @@ COLORS = {
     "amber_deep": (255, 145, 58, 255),
     "paper": (255, 255, 255, 255),
     "paper_edge": (231, 238, 250, 255),
+    "dark_bg": (6, 15, 30, 255),
+    "dark_ink": (242, 247, 255, 255),
 }
 
 
@@ -54,7 +60,26 @@ def rounded_mask(size=SIZE, radius=232):
     return mask
 
 
-def background_layer():
+def background_layer(mode="default"):
+    if mode == "dark":
+        img = Image.new("RGBA", (SIZE, SIZE), COLORS["dark_bg"])
+        pix = img.load()
+        for y in range(SIZE):
+            for x in range(SIZE):
+                nx = x / (SIZE - 1)
+                ny = y / (SIZE - 1)
+                blue_lift = max(0, 1 - (((nx - 0.54) ** 2 + (ny - 0.36) ** 2) ** 0.5) * 1.65)
+                amber_lift = max(0, 1 - (((nx - 0.36) ** 2 + (ny - 0.80) ** 2) ** 0.5) * 2.2)
+                r = int(6 + 18 * blue_lift + 18 * amber_lift)
+                g = int(15 + 32 * blue_lift + 15 * amber_lift)
+                b = int(30 + 64 * blue_lift + 4 * amber_lift)
+                pix[x, y] = (r, g, b, 255)
+
+        draw = ImageDraw.Draw(img, "RGBA")
+        draw.rounded_rectangle((54, 54, SIZE - 54, SIZE - 54), radius=208, outline=(114, 168, 255, 46), width=3)
+        draw.rounded_rectangle((82, 82, SIZE - 82, SIZE - 82), radius=180, outline=(255, 181, 64, 38), width=2)
+        return img
+
     img = Image.new("RGBA", (SIZE, SIZE), COLORS["paper"])
     pix = img.load()
     for y in range(SIZE):
@@ -74,16 +99,20 @@ def background_layer():
     return img
 
 
-def hope_accent_layer():
+def hope_accent_layer(mode="default"):
     layer = new_layer()
     draw = ImageDraw.Draw(layer, "RGBA")
+    boost = 1.28 if mode == "dark" else 1.0
+
+    def alpha(value):
+        return min(190, int(value * boost))
 
     # Sunrise/horizon cue: hope without turning the icon into a landscape.
-    draw.pieslice((194, 630, 830, 1266), start=180, end=360, fill=(255, 181, 64, 86))
-    draw.arc((214, 650, 810, 1246), start=181, end=359, fill=(255, 145, 58, 130), width=24)
-    draw.arc((282, 704, 742, 1164), start=181, end=359, fill=(255, 181, 64, 94), width=12)
-    draw.rounded_rectangle((238, 772, 786, 800), radius=14, fill=(255, 181, 64, 88))
-    draw.rounded_rectangle((320, 818, 704, 834), radius=8, fill=(36, 107, 254, 42))
+    draw.pieslice((194, 630, 830, 1266), start=180, end=360, fill=(255, 181, 64, alpha(86)))
+    draw.arc((214, 650, 810, 1246), start=181, end=359, fill=(255, 145, 58, alpha(130)), width=24)
+    draw.arc((282, 704, 742, 1164), start=181, end=359, fill=(255, 181, 64, alpha(94)), width=12)
+    draw.rounded_rectangle((238, 772, 786, 800), radius=14, fill=(255, 181, 64, alpha(88)))
+    draw.rounded_rectangle((320, 818, 704, 834), radius=8, fill=(80, 139, 255, alpha(42)))
 
     glow = layer.filter(ImageFilter.GaussianBlur(18))
     glow.alpha_composite(layer)
@@ -115,7 +144,7 @@ def tint_symbol(symbol, color):
     return tinted
 
 
-def symbol_document_layer():
+def symbol_document_layer(mode="default"):
     symbol = sf_symbol_image("doc.text.fill", 620)
     if symbol is None:
         return fallback_document_layer()
@@ -131,11 +160,13 @@ def symbol_document_layer():
         target_w = 590
         target_h = int(symbol.height * (target_w / symbol.width))
     symbol = symbol.resize((target_w, target_h), Image.Resampling.LANCZOS)
-    symbol = tint_symbol(symbol, (255, 255, 255, 238))
+    symbol_fill = (255, 255, 255, 238) if mode != "dark" else (28, 47, 80, 212)
+    symbol = tint_symbol(symbol, symbol_fill)
     symbol_alpha = symbol.getchannel("A")
     outline_alpha = symbol_alpha.filter(ImageFilter.MaxFilter(13))
     outline_alpha = ImageChops.subtract(outline_alpha, symbol_alpha).filter(ImageFilter.GaussianBlur(0.8))
-    outline = Image.new("RGBA", symbol.size, (198, 215, 242, 170))
+    outline_color = (198, 215, 242, 170) if mode != "dark" else (116, 166, 255, 164)
+    outline = Image.new("RGBA", symbol.size, outline_color)
     outline.putalpha(outline_alpha)
 
     layer = new_layer()
@@ -145,7 +176,8 @@ def symbol_document_layer():
     shadow_draw = ImageDraw.Draw(shadow, "RGBA")
     x = (SIZE - symbol.width) // 2
     y = 158
-    shadow_draw.rounded_rectangle((x + 12, y + 18, x + symbol.width - 12, y + symbol.height - 8), radius=58, fill=(11, 34, 74, 44))
+    shadow_fill = (11, 34, 74, 44) if mode != "dark" else (0, 0, 0, 44)
+    shadow_draw.rounded_rectangle((x + 12, y + 18, x + symbol.width - 12, y + symbol.height - 8), radius=58, fill=shadow_fill)
     shadow = ImageChops.offset(shadow, 0, 18).filter(ImageFilter.GaussianBlur(18))
     layer.alpha_composite(shadow)
 
@@ -153,8 +185,10 @@ def symbol_document_layer():
     layer.alpha_composite(symbol, (x, y))
 
     # Quiet Apple-blue text lines inside the SF Symbol document.
+    line_color = (36, 107, 254) if mode != "dark" else (142, 188, 255)
+    alpha_scale = 1 if mode != "dark" else 1.45
     for line_y, width, alpha in ((336, 278, 92), (386, 332, 78), (436, 244, 66)):
-        draw.rounded_rectangle((346, line_y, 346 + width, line_y + 18), radius=9, fill=(36, 107, 254, alpha))
+        draw.rounded_rectangle((346, line_y, 346 + width, line_y + 18), radius=9, fill=(*line_color, min(190, int(alpha * alpha_scale))))
 
     return layer
 
@@ -197,7 +231,7 @@ def text_mask():
     return mask.filter(ImageFilter.GaussianBlur(0.12))
 
 
-def type_shadow_layer(mask):
+def type_shadow_layer(mask, mode="default"):
     long_shadow = Image.new("L", (SIZE, SIZE), 0)
     for i in range(1, 42):
         shifted = ImageChops.offset(mask, i * 2, i * 3)
@@ -206,28 +240,30 @@ def type_shadow_layer(mask):
     long_shadow = long_shadow.filter(ImageFilter.GaussianBlur(7))
 
     layer = new_layer()
-    layer.alpha_composite(Image.composite(Image.new("RGBA", (SIZE, SIZE), (12, 29, 62, 138)), layer, long_shadow))
+    shadow_color = (12, 29, 62, 138) if mode != "dark" else (0, 0, 0, 190)
+    layer.alpha_composite(Image.composite(Image.new("RGBA", (SIZE, SIZE), shadow_color), layer, long_shadow))
     return layer
 
 
-def type_layer(mask):
+def type_layer(mask, mode="default"):
     layer = new_layer()
 
-    fill = Image.new("RGBA", (SIZE, SIZE), COLORS["ink"])
+    fill_color = COLORS["ink"] if mode != "dark" else COLORS["dark_ink"]
+    fill = Image.new("RGBA", (SIZE, SIZE), fill_color)
     blue_rim = ImageChops.subtract(ImageChops.offset(mask, -5, -4), mask)
     amber_rim = ImageChops.subtract(ImageChops.offset(mask, 5, 4), mask)
 
     layer.alpha_composite(Image.composite(fill, layer, mask))
     layer.alpha_composite(
         Image.composite(
-            Image.new("RGBA", (SIZE, SIZE), (36, 107, 254, 112)),
+            Image.new("RGBA", (SIZE, SIZE), (36, 107, 254, 132 if mode == "dark" else 112)),
             Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0)),
             blue_rim.filter(ImageFilter.GaussianBlur(1.1)),
         )
     )
     layer.alpha_composite(
         Image.composite(
-            Image.new("RGBA", (SIZE, SIZE), (255, 181, 64, 92)),
+            Image.new("RGBA", (SIZE, SIZE), (255, 181, 64, 122 if mode == "dark" else 92)),
             Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0)),
             amber_rim.filter(ImageFilter.GaussianBlur(1.4)),
         )
@@ -251,6 +287,12 @@ def glass_highlights_layer(mask):
 
 def flatten_opaque(img):
     flattened = Image.new("RGBA", img.size, COLORS["paper"])
+    flattened.alpha_composite(img)
+    return flattened.convert("RGB")
+
+
+def flatten_on(img, background):
+    flattened = Image.new("RGBA", img.size, background)
     flattened.alpha_composite(img)
     return flattened.convert("RGB")
 
@@ -283,23 +325,76 @@ def watch_master(master):
     return watch.convert("RGB")
 
 
-def main():
+def compose(mode="default"):
     mask = text_mask()
     layers = [
-        ("01-white-hope-background.png", background_layer()),
-        ("02-sunrise-hope-accent.png", hope_accent_layer()),
-        ("03-sf-doc-text-symbol.png", symbol_document_layer()),
-        ("04-CV-type-shadow.png", type_shadow_layer(mask)),
-        ("05-CV-typography.png", type_layer(mask)),
+        ("01-white-hope-background.png", background_layer(mode)),
+        ("02-sunrise-hope-accent.png", hope_accent_layer(mode)),
+        ("03-sf-doc-text-symbol.png", symbol_document_layer(mode)),
+        ("04-CV-type-shadow.png", type_shadow_layer(mask, mode)),
+        ("05-CV-typography.png", type_layer(mask, mode)),
         ("06-glass-highlights.png", glass_highlights_layer(mask)),
     ]
-
-    for name, layer in layers:
-        layer.save(SOURCE / name)
 
     preview = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
     for _, layer in layers:
         preview.alpha_composite(layer)
+    return layers, preview
+
+
+def mono_variant(master):
+    gray = master.convert("L")
+    return Image.merge("RGB", (gray, gray, gray))
+
+
+def tinted_grayscale_variant(master):
+    gray = master.convert("L")
+    toned = Image.new("RGB", master.size)
+    pix_in = gray.load()
+    pix_out = toned.load()
+    for y in range(master.height):
+        for x in range(master.width):
+            value = pix_in[x, y]
+            # Preserve grayscale for Icon Composer tinted/mono input, with slightly lifted contrast.
+            lifted = max(0, min(255, int((value - 16) * 1.08 + 16)))
+            pix_out[x, y] = (lifted, lifted, lifted)
+    return toned
+
+
+def write_icon_package(layer_names):
+    if ICON_PACKAGE.exists():
+        shutil.rmtree(ICON_PACKAGE)
+    assets = ICON_PACKAGE / "Assets"
+    assets.mkdir(parents=True)
+    for name in layer_names:
+        shutil.copy2(SOURCE / name, assets / name)
+
+    # Icon Composer packages are folders with icon.json and an Assets directory.
+    # This baseline package opens in Icon Composer; use the inspector there for
+    # per-appearance Liquid Glass tuning, then export with ictool or the GUI.
+    data = {
+        "groups": [
+            {
+                "layers": [
+                    {"image-name": name, "name": Path(name).stem}
+                    for name in reversed(layer_names)
+                ],
+                "shadow": {"kind": "neutral", "opacity": 0.42},
+                "translucency": {"enabled": True, "value": 0.16},
+            }
+        ],
+        "supported-platforms": {
+            "circles": ["watchOS"],
+            "squares": "shared",
+        },
+    }
+    (ICON_PACKAGE / "icon.json").write_text(json.dumps(data, indent=2) + "\n")
+
+
+def main():
+    layers, preview = compose("default")
+    for name, layer in layers:
+        layer.save(SOURCE / name)
 
     opaque_preview = flatten_opaque(preview)
     opaque_preview.save(EXPORTS / "TailrCV-HopeWhite-preview-1024.png")
@@ -307,9 +402,18 @@ def main():
     opaque_preview.save(SOURCE / "TailrCV-HopeWhite-AppStore-1024-opaque.png")
     watch_master(preview).save(SOURCE / "TailrCV-HopeWhite-IconComposer-watchOS-Default-1088.png")
 
+    _, dark_preview = compose("dark")
+    dark = flatten_on(dark_preview, COLORS["dark_bg"])
+    dark.save(APPEARANCE / "TailrCV-HopeWhite-IconComposer-iOS-macOS-Dark-1024.png")
+    mono_variant(opaque_preview).save(APPEARANCE / "TailrCV-HopeWhite-IconComposer-iOS-macOS-Mono-1024.png")
+    tinted_grayscale_variant(opaque_preview).save(APPEARANCE / "TailrCV-HopeWhite-IconComposer-iOS-macOS-Tinted-Grayscale-1024.png")
+
     save_sizes(opaque_preview, "TailrCV-HopeWhite-IconComposer", ICON_SIZED)
     save_sizes(opaque_preview, "TailrCV-HopeWhite-Raw", RAW_SIZED)
     contact_sheet(opaque_preview, EXPORTS / "TailrCV-HopeWhite-contact-sheet.png")
+    contact_sheet(dark, APPEARANCE / "TailrCV-HopeWhite-Dark-contact-sheet.png")
+    contact_sheet(mono_variant(opaque_preview), APPEARANCE / "TailrCV-HopeWhite-Mono-contact-sheet.png")
+    write_icon_package([name for name, _ in layers])
 
 
 if __name__ == "__main__":

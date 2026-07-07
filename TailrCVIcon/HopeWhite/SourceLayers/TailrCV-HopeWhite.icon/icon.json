@@ -1,0 +1,46 @@
+{
+  "groups": [
+    {
+      "layers": [
+        {
+          "image-name": "06-glass-highlights.png",
+          "name": "06-glass-highlights"
+        },
+        {
+          "image-name": "05-CV-typography.png",
+          "name": "05-CV-typography"
+        },
+        {
+          "image-name": "04-CV-type-shadow.png",
+          "name": "04-CV-type-shadow"
+        },
+        {
+          "image-name": "03-sf-doc-text-symbol.png",
+          "name": "03-sf-doc-text-symbol"
+        },
+        {
+          "image-name": "02-sunrise-hope-accent.png",
+          "name": "02-sunrise-hope-accent"
+        },
+        {
+          "image-name": "01-white-hope-background.png",
+          "name": "01-white-hope-background"
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.42
+      },
+      "translucency": {
+        "enabled": true,
+        "value": 0.16
+      }
+    }
+  ],
+  "supported-platforms": {
+    "circles": [
+      "watchOS"
+    ],
+    "squares": "shared"
+  }
+}
