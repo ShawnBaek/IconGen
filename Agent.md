@@ -17,6 +17,7 @@ Best examples in this repo:
 
 - CityCommuter Singapore transit icon: `CityCommuterIcon/SingaporeTransitClean/`
 - ShadowTeep Thailand flag white icon: `ShadowTeepIcon/ThailandFlagWhite/`
+- TailrCV hope white icon: `TailrCVIcon/HopeWhite/`
 
 ## Tools
 
@@ -237,6 +238,28 @@ Key files:
 - watchOS master: `ShadowTeepIcon/ThailandFlagWhite/SourceLayers/ShadowTeep-ThaiWhite-IconComposer-watchOS-Default-1088.png`
 - Contact preview: `ShadowTeepIcon/ThailandFlagWhite/Exports/ShadowTeep-ThaiWhite-preview-1024.png`
 - Resized set: `ShadowTeepIcon/ThailandFlagWhite/Exports/IconComposerSized/`
+
+### TailrCV, Hope White
+
+Purpose: macOS app for generating CVs for job seekers.
+
+Design:
+
+- Monogram: `CV`
+- Background: white with a subtle blue/amber wash
+- Hope color: sunrise amber `#FFB540`
+- Trust/professional color: blue `#246BFE` and navy ink
+- Concept cue: tailored document page with a fold, plus a sunrise base for optimism.
+- App Store note: the 1024 PNG is intentionally RGB/opaque with no alpha.
+
+Key files:
+
+- Source layers: `TailrCVIcon/HopeWhite/SourceLayers/`
+- iOS/macOS master: `TailrCVIcon/HopeWhite/SourceLayers/TailrCV-HopeWhite-IconComposer-iOS-macOS-Default-1024.png`
+- App Store opaque PNG: `TailrCVIcon/HopeWhite/SourceLayers/TailrCV-HopeWhite-AppStore-1024-opaque.png`
+- watchOS master: `TailrCVIcon/HopeWhite/SourceLayers/TailrCV-HopeWhite-IconComposer-watchOS-Default-1088.png`
+- Contact sheet: `TailrCVIcon/HopeWhite/Exports/TailrCV-HopeWhite-contact-sheet.png`
+- Resized set: `TailrCVIcon/HopeWhite/Exports/IconComposerSized/`
 
 ## Icon Composer Notes
 

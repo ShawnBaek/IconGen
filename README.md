@@ -2,7 +2,7 @@
 
 Typography-first Apple app icon experiments for iOS, macOS, and watchOS.
 
-This repo keeps the source layers, Icon Composer files/exports, and resized PNG sets for side-project app icons. The current strongest designs are CityCommuter and ShadowTeep.
+This repo keeps the source layers, Icon Composer files/exports, and resized PNG sets for side-project app icons. The current strongest designs are CityCommuter, ShadowTeep, and TailrCV.
 
 Apple guidance used for this workflow:
 
@@ -42,6 +42,20 @@ Files:
 - Preview: `ShadowTeepIcon/ThailandFlagWhite/Exports/ShadowTeep-ThaiWhite-preview-1024.png`
 - Resized set: `ShadowTeepIcon/ThailandFlagWhite/Exports/IconComposerSized/`
 
+### TailrCV
+
+macOS CV generation app for job seekers. The icon uses a bold `CV` monogram, a tailored document shape, professional navy/blue, and a sunrise amber accent for hope.
+
+<img src="TailrCVIcon/HopeWhite/SourceLayers/TailrCV-HopeWhite-IconComposer-iOS-macOS-Default-1024.png" alt="TailrCV icon" width="220">
+
+Files:
+
+- iOS/macOS master: `TailrCVIcon/HopeWhite/SourceLayers/TailrCV-HopeWhite-IconComposer-iOS-macOS-Default-1024.png`
+- App Store opaque PNG: `TailrCVIcon/HopeWhite/SourceLayers/TailrCV-HopeWhite-AppStore-1024-opaque.png`
+- watchOS master: `TailrCVIcon/HopeWhite/SourceLayers/TailrCV-HopeWhite-IconComposer-watchOS-Default-1088.png`
+- Contact sheet: `TailrCVIcon/HopeWhite/Exports/TailrCV-HopeWhite-contact-sheet.png`
+- Resized set: `TailrCVIcon/HopeWhite/Exports/IconComposerSized/`
+
 ## Repository Layout
 
 ```text
@@ -55,6 +69,12 @@ CityCommuterIcon/
       RawSized/
 ShadowTeepIcon/
   ThailandFlagWhite/
+    SourceLayers/
+    Exports/
+      IconComposerSized/
+      RawSized/
+TailrCVIcon/
+  HopeWhite/
     SourceLayers/
     Exports/
       IconComposerSized/
@@ -84,6 +104,7 @@ Current best Icon Composer PNG masters:
 
 - `CityCommuterIcon/SingaporeTransitClean/SourceLayers/CityCommuter-SingaporeTransitClean-IconComposer-iOS-macOS-Default-1024.png`
 - `ShadowTeepIcon/ThailandFlagWhite/SourceLayers/ShadowTeep-ThaiWhite-IconComposer-iOS-macOS-Default-1024.png`
+- `TailrCVIcon/HopeWhite/SourceLayers/TailrCV-HopeWhite-IconComposer-iOS-macOS-Default-1024.png`
 
 ## Workflow
 
