@@ -12,6 +12,8 @@ Create polished iOS, macOS, and watchOS app icons with a typography-first Apple 
 - Saved `.icon` files as the preferred Xcode handoff when possible.
 - Final Icon Composer preview/export PNGs for iOS/macOS and watchOS.
 - Resized PNG sets generated only from the approved Icon Composer master.
+- macOS fallback delivery assets: explicit `AppIcon.appiconset` PNGs at all
+  mac idiom slots and a matching `.icns`, not only a 1024 PNG.
 
 Best examples in this repo:
 
@@ -30,6 +32,8 @@ Use these tools in this order.
 2. Python + Pillow
    - Generate precise 1024 x 1024 transparent PNG layers.
    - Resize final masters into AppIcon sizes.
+   - Generate macOS `AppIcon.appiconset` ladders and `.icns` files from
+     the approved master.
    - Build contact sheets for small-size visual QA.
    - PNG is acceptable for this typography workflow; use SVG for scalable vector source when a design starts in a vector editor.
 
@@ -105,6 +109,19 @@ AppNameIcon/
         AppName-Variant-IconComposer-32.png
         ...
         AppName-Variant-IconComposer-1024.png
+      MacOSAppIcon.appiconset/
+        Contents.json
+        icon_16x16.png
+        icon_16x16@2x.png
+        icon_32x32.png
+        icon_32x32@2x.png
+        icon_128x128.png
+        icon_128x128@2x.png
+        icon_256x256.png
+        icon_256x256@2x.png
+        icon_512x512.png
+        icon_512x512@2x.png
+      AppName-Variant-AppIcon.icns
       RawSized/
         AppName-Variant-Raw-16.png
         ...
@@ -125,6 +142,15 @@ Apple's current app icon documentation changes how to think about final delivery
 - For source artwork from vector tools, prefer SVG. Convert text to outlines because SVG does not preserve fonts. For this repo's generated typography PNG layers, keep the Python source script so the type remains reproducible.
 - Remove baked blurs, shadows, translucency, background gradients, and similar effects before importing when possible; apply those effects in Icon Composer where they can be previewed with Liquid Glass.
 - For non-Icon-Composer fallback asset catalogs, Xcode can generate many icon variations from a single high-resolution image for iOS, iPadOS, tvOS, and watchOS. macOS app icon sets still need explicit sizes when using an asset catalog.
+- For macOS asset-catalog or `.icns` fallback delivery, always export the full
+  ladder from the approved master:
+  `16x16`, `16x16@2x`, `32x32`, `32x32@2x`, `128x128`, `128x128@2x`,
+  `256x256`, `256x256@2x`, `512x512`, and `512x512@2x`.
+- When a macOS project uses `CFBundleIconFile = AppIcon` or a build script
+  that copies `AppIcon.icns`, updating only the `.icon` package is not enough.
+  Regenerate `AppIcon.icns` and the `Assets.xcassets/AppIcon.appiconset`
+  PNGs from the same approved master, then verify the built bundle contains
+  the expected resource.
 - App Store 1024 PNG artwork must not contain transparency. Use an RGB/sRGB, fully opaque 1024 x 1024 PNG with the background already flattened into the image.
 - iOS and iPadOS asset catalogs support Light, Dark, and Tinted icon appearances. Tinted icons should be grayscale; dark icons should use transparent backgrounds so the system background can show through.
 - Always test the icon in Simulator or on a real device for the supported platforms and appearances.
@@ -188,6 +214,9 @@ Apple's current app icon documentation changes how to think about final delivery
    - Standard sizes:
      - `16, 20, 29, 32, 40, 58, 60, 64, 76, 80, 87, 120, 128, 152, 167, 180, 256, 512, 1024`
    - Save into `Exports/IconComposerSized/`.
+   - For macOS app projects that use asset catalogs or `AppIcon.icns`, also
+     generate `Exports/MacOSAppIcon.appiconset/` with every mac idiom slot and
+     a matching `Exports/*-AppIcon.icns`.
    - If the resize source has alpha, create a separate flattened opaque App Store PNG instead of reusing the transparent master.
 
 9. Verify
@@ -196,6 +225,9 @@ Apple's current app icon documentation changes how to think about final delivery
    - Confirm the icon reads at 32 px and 64 px.
    - Confirm no unwanted edge artifacts after Icon Composer export.
    - Add the `.icon` file to an Xcode target when possible and test in Simulator or on device.
+   - For macOS app bundles, inspect `CFBundleIconFile`, `CFBundleIconName`,
+     `Contents/Resources/AppIcon.icns`, and the generated asset catalog output
+     after a build.
 
 ## Current Best Icons
 
@@ -251,6 +283,10 @@ Design:
 - Trust/professional color: blue `#246BFE` and navy ink
 - Concept cue: real SF Symbol `doc.text.fill` as the CV document, plus a sunrise base for optimism.
 - App Store note: the 1024 PNG is intentionally RGB/opaque with no alpha.
+- macOS delivery note: TailrCV also generates
+  `Exports/MacOSAppIcon.appiconset/` and
+  `Exports/TailrCV-HopeWhite-AppIcon.icns` for projects that still ship via
+  `AppIcon` instead of directly using the `.icon` package.
 - Appearance support: Default, Dark, Mono, and Tinted-Grayscale preview masters are generated in `Exports/AppearanceVariants/`.
 - Icon Composer package: `TailrCV-HopeWhite.icon` is generated and verified with `ictool`; use Icon Composer's inspector for final per-appearance Liquid Glass tuning.
 

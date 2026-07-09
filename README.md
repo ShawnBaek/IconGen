@@ -56,6 +56,8 @@ Files:
 - Mono appearance: `TailrCVIcon/HopeWhite/Exports/AppearanceVariants/TailrCV-HopeWhite-IconComposer-iOS-macOS-Mono-1024.png`
 - Tinted grayscale source: `TailrCVIcon/HopeWhite/Exports/AppearanceVariants/TailrCV-HopeWhite-IconComposer-iOS-macOS-Tinted-Grayscale-1024.png`
 - App Store opaque PNG: `TailrCVIcon/HopeWhite/SourceLayers/TailrCV-HopeWhite-AppStore-1024-opaque.png`
+- macOS AppIcon set: `TailrCVIcon/HopeWhite/Exports/MacOSAppIcon.appiconset/`
+- macOS icns: `TailrCVIcon/HopeWhite/Exports/TailrCV-HopeWhite-AppIcon.icns`
 - watchOS master: `TailrCVIcon/HopeWhite/SourceLayers/TailrCV-HopeWhite-IconComposer-watchOS-Default-1088.png`
 - Contact sheet: `TailrCVIcon/HopeWhite/Exports/TailrCV-HopeWhite-contact-sheet.png`
 - Resized set: `TailrCVIcon/HopeWhite/Exports/IconComposerSized/`
@@ -98,8 +100,13 @@ Each finished variant should keep:
 - Saved Icon Composer `.icon` document in `SourceLayers/` whenever possible
 - iOS/macOS Icon Composer master PNG in `SourceLayers/*-IconComposer-iOS-macOS-Default-1024.png`
 - watchOS Icon Composer master PNG in `SourceLayers/*-IconComposer-watchOS-Default-1088.png`
+- For macOS fallback projects, a full `Exports/MacOSAppIcon.appiconset/`
+  ladder and a matching `Exports/*-AppIcon.icns`
 
 For modern Xcode projects, the `.icon` document is the preferred production handoff. The PNG masters remain useful for visual review, README showcase images, fallback asset catalogs, and generating resized PNG sets.
+When the target still uses `CFBundleIconFile = AppIcon`, update both
+`AppIcon.icns` and every mac idiom image in `AppIcon.appiconset`; a single 1024
+PNG is not enough for macOS fallback delivery.
 
 Current saved `.icon` document:
 
@@ -123,7 +130,10 @@ Current best Icon Composer PNG masters:
 7. Preview iOS/macOS, watchOS, and appearance variants.
 8. Export Icon Composer masters.
 9. Generate resized PNGs from the final 1024 master.
-10. Verify with a contact sheet at 16, 32, 64, 128, and 256 px.
-11. Add the `.icon` file to Xcode and verify in Simulator or on device when working inside an app project.
+10. For macOS fallback handoff, generate the explicit AppIcon ladder:
+    `16x16`, `16x16@2x`, `32x32`, `32x32@2x`, `128x128`, `128x128@2x`,
+    `256x256`, `256x256@2x`, `512x512`, and `512x512@2x`, plus `.icns`.
+11. Verify with a contact sheet at 16, 32, 64, 128, and 256 px.
+12. Add the `.icon` file or macOS fallback assets to Xcode and verify in Simulator or on device when working inside an app project.
 
 See `Agent.md` for the detailed future-session rules and tool notes.

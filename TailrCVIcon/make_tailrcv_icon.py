@@ -2,6 +2,7 @@ from pathlib import Path
 from io import BytesIO
 import json
 import shutil
+import subprocess
 
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
@@ -13,14 +14,16 @@ EXPORTS = VARIANT / "Exports"
 ICON_SIZED = EXPORTS / "IconComposerSized"
 RAW_SIZED = EXPORTS / "RawSized"
 APPEARANCE = EXPORTS / "AppearanceVariants"
+MACOS_APPICON = EXPORTS / "MacOSAppIcon.appiconset"
 ICON_PACKAGE = SOURCE / "TailrCV-HopeWhite.icon"
 
-for directory in (SOURCE, EXPORTS, ICON_SIZED, RAW_SIZED, APPEARANCE):
+for directory in (SOURCE, EXPORTS, ICON_SIZED, RAW_SIZED, APPEARANCE, MACOS_APPICON):
     directory.mkdir(parents=True, exist_ok=True)
 
 SIZE = 1024
 WATCH_SIZE = 1088
 SIZES = [16, 20, 29, 32, 40, 58, 60, 64, 76, 80, 87, 120, 128, 152, 167, 180, 256, 512, 1024]
+MACOS_ICON_SLOTS = [16, 32, 128, 256, 512]
 
 FONT_PATHS = [
     "/Library/Fonts/SF-Pro-Display-Heavy.otf",
@@ -76,8 +79,8 @@ def background_layer(mode="default"):
                 pix[x, y] = (r, g, b, 255)
 
         draw = ImageDraw.Draw(img, "RGBA")
-        draw.rounded_rectangle((54, 54, SIZE - 54, SIZE - 54), radius=208, outline=(114, 168, 255, 46), width=3)
-        draw.rounded_rectangle((82, 82, SIZE - 82, SIZE - 82), radius=180, outline=(255, 181, 64, 38), width=2)
+        draw.rounded_rectangle((18, 18, SIZE - 18, SIZE - 18), radius=242, outline=(114, 168, 255, 82), width=8)
+        draw.rounded_rectangle((46, 46, SIZE - 46, SIZE - 46), radius=218, outline=(255, 181, 64, 58), width=4)
         return img
 
     img = Image.new("RGBA", (SIZE, SIZE), COLORS["paper"])
@@ -86,16 +89,19 @@ def background_layer(mode="default"):
         for x in range(SIZE):
             nx = x / (SIZE - 1)
             ny = y / (SIZE - 1)
-            blue_lift = max(0, 1 - (((nx - 0.52) ** 2 + (ny - 0.35) ** 2) ** 0.5) * 1.75)
-            amber_lift = max(0, 1 - (((nx - 0.36) ** 2 + (ny - 0.78) ** 2) ** 0.5) * 2.05)
-            r = int(255 - 14 * blue_lift)
-            g = int(255 - 7 * blue_lift - 10 * amber_lift)
-            b = int(255 - 2 * amber_lift)
+            blue_lift = max(0, 1 - (((nx - 0.52) ** 2 + (ny - 0.35) ** 2) ** 0.5) * 1.62)
+            amber_lift = max(0, 1 - (((nx - 0.36) ** 2 + (ny - 0.78) ** 2) ** 0.5) * 1.9)
+            edge_lift = max(0, min(nx, ny, 1 - nx, 1 - ny))
+            edge_lift = 1 - min(1, edge_lift / 0.18)
+            r = int(255 - 18 * blue_lift - 2 * edge_lift)
+            g = int(255 - 10 * blue_lift - 12 * amber_lift - 4 * edge_lift)
+            b = int(255 - 2 * amber_lift - 9 * edge_lift)
             pix[x, y] = (r, g, b, 255)
 
     draw = ImageDraw.Draw(img, "RGBA")
-    draw.rounded_rectangle((54, 54, SIZE - 54, SIZE - 54), radius=208, outline=(36, 107, 254, 30), width=3)
-    draw.rounded_rectangle((82, 82, SIZE - 82, SIZE - 82), radius=180, outline=(255, 181, 64, 28), width=2)
+    draw.rounded_rectangle((18, 18, SIZE - 18, SIZE - 18), radius=242, outline=(36, 107, 254, 72), width=8)
+    draw.rounded_rectangle((46, 46, SIZE - 46, SIZE - 46), radius=218, outline=(255, 181, 64, 50), width=4)
+    draw.rounded_rectangle((72, 72, SIZE - 72, SIZE - 72), radius=194, outline=(36, 107, 254, 22), width=2)
     return img
 
 
@@ -108,11 +114,11 @@ def hope_accent_layer(mode="default"):
         return min(190, int(value * boost))
 
     # Sunrise/horizon cue: hope without turning the icon into a landscape.
-    draw.pieslice((194, 630, 830, 1266), start=180, end=360, fill=(255, 181, 64, alpha(86)))
-    draw.arc((214, 650, 810, 1246), start=181, end=359, fill=(255, 145, 58, alpha(130)), width=24)
-    draw.arc((282, 704, 742, 1164), start=181, end=359, fill=(255, 181, 64, alpha(94)), width=12)
-    draw.rounded_rectangle((238, 772, 786, 800), radius=14, fill=(255, 181, 64, alpha(88)))
-    draw.rounded_rectangle((320, 818, 704, 834), radius=8, fill=(80, 139, 255, alpha(42)))
+    draw.pieslice((124, 604, 900, 1380), start=180, end=360, fill=(255, 181, 64, alpha(96)))
+    draw.arc((144, 624, 880, 1360), start=181, end=359, fill=(255, 145, 58, alpha(144)), width=30)
+    draw.arc((240, 706, 784, 1250), start=181, end=359, fill=(255, 181, 64, alpha(102)), width=15)
+    draw.rounded_rectangle((196, 790, 828, 824), radius=17, fill=(255, 181, 64, alpha(92)))
+    draw.rounded_rectangle((292, 848, 732, 866), radius=9, fill=(80, 139, 255, alpha(46)))
 
     glow = layer.filter(ImageFilter.GaussianBlur(18))
     glow.alpha_composite(layer)
@@ -154,10 +160,10 @@ def symbol_document_layer(mode="default"):
         return fallback_document_layer()
 
     symbol = symbol.crop(bbox)
-    target_h = 660
+    target_h = 720
     target_w = int(symbol.width * (target_h / symbol.height))
-    if target_w > 590:
-        target_w = 590
+    if target_w > 650:
+        target_w = 650
         target_h = int(symbol.height * (target_w / symbol.width))
     symbol = symbol.resize((target_w, target_h), Image.Resampling.LANCZOS)
     symbol_fill = (255, 255, 255, 238) if mode != "dark" else (28, 47, 80, 212)
@@ -175,7 +181,7 @@ def symbol_document_layer(mode="default"):
     shadow = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
     shadow_draw = ImageDraw.Draw(shadow, "RGBA")
     x = (SIZE - symbol.width) // 2
-    y = 158
+    y = 112
     shadow_fill = (11, 34, 74, 44) if mode != "dark" else (0, 0, 0, 44)
     shadow_draw.rounded_rectangle((x + 12, y + 18, x + symbol.width - 12, y + symbol.height - 8), radius=58, fill=shadow_fill)
     shadow = ImageChops.offset(shadow, 0, 18).filter(ImageFilter.GaussianBlur(18))
@@ -187,8 +193,8 @@ def symbol_document_layer(mode="default"):
     # Quiet Apple-blue text lines inside the SF Symbol document.
     line_color = (36, 107, 254) if mode != "dark" else (142, 188, 255)
     alpha_scale = 1 if mode != "dark" else 1.45
-    for line_y, width, alpha in ((336, 278, 92), (386, 332, 78), (436, 244, 66)):
-        draw.rounded_rectangle((346, line_y, 346 + width, line_y + 18), radius=9, fill=(*line_color, min(190, int(alpha * alpha_scale))))
+    for line_y, width, alpha in ((306, 318, 96), (360, 374, 82), (414, 282, 70)):
+        draw.rounded_rectangle((326, line_y, 326 + width, line_y + 20), radius=10, fill=(*line_color, min(190, int(alpha * alpha_scale))))
 
     return layer
 
@@ -217,15 +223,15 @@ def fallback_document_layer():
 def text_mask():
     mask = Image.new("L", (SIZE, SIZE), 0)
     draw = ImageDraw.Draw(mask)
-    fnt = font(414)
+    fnt = font(486)
     c_box = draw.textbbox((0, 0), "C", font=fnt)
     v_box = draw.textbbox((0, 0), "V", font=fnt)
     c_w = c_box[2] - c_box[0]
     v_w = v_box[2] - v_box[0]
-    kern = -24
+    kern = -28
     total_w = c_w + v_w + kern
-    x = (SIZE - total_w) // 2 - 2
-    y = 360
+    x = (SIZE - total_w) // 2 - 4
+    y = 326
     draw.text((x, y), "C", font=fnt, fill=255)
     draw.text((x + c_w + kern, y), "V", font=fnt, fill=255)
     return mask.filter(ImageFilter.GaussianBlur(0.12))
@@ -301,6 +307,49 @@ def save_sizes(master, prefix, out_dir):
     out_dir.mkdir(exist_ok=True)
     for size in SIZES:
         master.resize((size, size), Image.Resampling.LANCZOS).save(out_dir / f"{prefix}-{size}.png")
+
+
+def write_macos_app_icon_set(master, out_dir):
+    if out_dir.exists():
+        shutil.rmtree(out_dir)
+    out_dir.mkdir(parents=True)
+
+    images = []
+    for base in MACOS_ICON_SLOTS:
+        for scale, suffix in ((1, ""), (2, "@2x")):
+            pixel_size = base * scale
+            filename = f"icon_{base}x{base}{suffix}.png"
+            master.resize((pixel_size, pixel_size), Image.Resampling.LANCZOS).save(out_dir / filename)
+            images.append(
+                {
+                    "filename": filename,
+                    "idiom": "mac",
+                    "scale": f"{scale}x",
+                    "size": f"{base}x{base}",
+                }
+            )
+
+    contents = {
+        "images": images,
+        "info": {
+            "author": "xcode",
+            "version": 1,
+        },
+    }
+    (out_dir / "Contents.json").write_text(json.dumps(contents, indent=2) + "\n")
+
+
+def write_macos_icns(app_icon_set, output_path):
+    iconset = output_path.with_suffix(".iconset")
+    if iconset.exists():
+        shutil.rmtree(iconset)
+    iconset.mkdir(parents=True)
+
+    for source in app_icon_set.glob("icon_*.png"):
+        shutil.copy2(source, iconset / source.name)
+
+    subprocess.run(["iconutil", "-c", "icns", str(iconset), "-o", str(output_path)], check=True)
+    shutil.rmtree(iconset)
 
 
 def contact_sheet(master, path):
@@ -410,6 +459,8 @@ def main():
 
     save_sizes(opaque_preview, "TailrCV-HopeWhite-IconComposer", ICON_SIZED)
     save_sizes(opaque_preview, "TailrCV-HopeWhite-Raw", RAW_SIZED)
+    write_macos_app_icon_set(opaque_preview, MACOS_APPICON)
+    write_macos_icns(MACOS_APPICON, EXPORTS / "TailrCV-HopeWhite-AppIcon.icns")
     contact_sheet(opaque_preview, EXPORTS / "TailrCV-HopeWhite-contact-sheet.png")
     contact_sheet(dark, APPEARANCE / "TailrCV-HopeWhite-Dark-contact-sheet.png")
     contact_sheet(mono_variant(opaque_preview), APPEARANCE / "TailrCV-HopeWhite-Mono-contact-sheet.png")
