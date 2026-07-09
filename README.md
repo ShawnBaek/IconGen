@@ -107,6 +107,12 @@ For modern Xcode projects, the `.icon` document is the preferred production hand
 When the target still uses `CFBundleIconFile = AppIcon`, update both
 `AppIcon.icns` and every mac idiom image in `AppIcon.appiconset`; a single 1024
 PNG is not enough for macOS fallback delivery.
+A complete macOS `AppIcon.appiconset` is still valid for release. Icon Composer
+is the better long-term source for macOS 26-era Liquid Glass and cross-appearance
+polish, but it is not required to fix a valid macOS 15 asset-catalog icon.
+After changing icons, archive again from the current project and do not upload
+old `build/*.xcarchive` outputs; stale archives can still contain old `.icns`
+representations that stop below 1024 px.
 
 Current saved `.icon` document:
 
@@ -135,5 +141,7 @@ Current best Icon Composer PNG masters:
     `256x256`, `256x256@2x`, `512x512`, and `512x512@2x`, plus `.icns`.
 11. Verify with a contact sheet at 16, 32, 64, 128, and 256 px.
 12. Add the `.icon` file or macOS fallback assets to Xcode and verify in Simulator or on device when working inside an app project.
+13. For macOS release builds, inspect the fresh archive's `AppIcon.icns` and
+    confirm it includes representations through 1024 px before uploading.
 
 See `Agent.md` for the detailed future-session rules and tool notes.

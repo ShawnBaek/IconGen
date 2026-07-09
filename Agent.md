@@ -136,6 +136,9 @@ Apple's current app icon documentation changes how to think about final delivery
 - Icon Composer creates a single multilayer `.icon` file that Xcode can use for iOS, iPadOS, macOS, watchOS, and App Store icon rendering.
 - Add the `.icon` file to the Xcode project bundle before building. In the target's General pane, the App Icon field must match the `.icon` filename without the extension.
 - In current Xcode, an Icon Composer file can replace an existing `AppIcon` asset catalog for the app icon. Xcode can generate similar-looking assets for older OS releases from the `.icon` file. If an app must keep its previous icon on older OS releases, continue using asset catalogs.
+- A complete macOS asset-catalog icon set is still valid. Do not treat
+  `AppIcon.appiconset` as wrong just because it is not Icon Composer; check
+  that every mac idiom slot exists and that Xcode emits a full `AppIcon.icns`.
 - Use Icon Composer's Document inspector to hide platforms the app does not support. For this repo, usually keep iOS/macOS and watchOS; disable unrelated platforms.
 - Icon Composer previews platform and appearance variants: iOS/macOS Default, Dark, Mono, clear/tinted options, and watchOS. Always inspect the variants that the app will ship.
 - Organize imported artwork into no more than four groups where possible. Groups are the depth layers the system renders.
@@ -151,6 +154,13 @@ Apple's current app icon documentation changes how to think about final delivery
   Regenerate `AppIcon.icns` and the `Assets.xcassets/AppIcon.appiconset`
   PNGs from the same approved master, then verify the built bundle contains
   the expected resource.
+- Do not submit an old `.xcarchive` after changing icons. Older archives can
+  still contain stale `.icns` files or representations that only go up to
+  256 px. Always create a fresh archive from the current project before
+  uploading to App Store Connect.
+- For macOS 15-era apps, a complete asset-catalog icon set is release-valid.
+  For macOS 26-era polish and cross-appearance icons, prefer Icon
+  Composer/Liquid Glass as the long-term source.
 - App Store 1024 PNG artwork must not contain transparency. Use an RGB/sRGB, fully opaque 1024 x 1024 PNG with the background already flattened into the image.
 - iOS and iPadOS asset catalogs support Light, Dark, and Tinted icon appearances. Tinted icons should be grayscale; dark icons should use transparent backgrounds so the system background can show through.
 - Always test the icon in Simulator or on a real device for the supported platforms and appearances.
@@ -228,6 +238,11 @@ Apple's current app icon documentation changes how to think about final delivery
    - For macOS app bundles, inspect `CFBundleIconFile`, `CFBundleIconName`,
      `Contents/Resources/AppIcon.icns`, and the generated asset catalog output
      after a build.
+   - Inspect the archive you plan to upload, not only the local Debug build.
+     Use `iconutil` or `sips` to confirm the archived `.icns` includes
+     representations through 1024 px.
+   - Delete or clearly ignore stale `build/*.xcarchive` outputs after icon
+     changes so they are not accidentally uploaded.
 
 ## Current Best Icons
 
@@ -287,6 +302,9 @@ Design:
   `Exports/MacOSAppIcon.appiconset/` and
   `Exports/TailrCV-HopeWhite-AppIcon.icns` for projects that still ship via
   `AppIcon` instead of directly using the `.icon` package.
+- Release note: do not upload old RoleFit/TailrCV archives created before the
+  macOS AppIcon ladder was regenerated. Build a fresh archive and verify the
+  archived `AppIcon.icns` contains all representations through 1024 px.
 - Appearance support: Default, Dark, Mono, and Tinted-Grayscale preview masters are generated in `Exports/AppearanceVariants/`.
 - Icon Composer package: `TailrCV-HopeWhite.icon` is generated and verified with `ictool`; use Icon Composer's inspector for final per-appearance Liquid Glass tuning.
 
