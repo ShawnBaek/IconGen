@@ -99,6 +99,7 @@ AppNameIcon/
       05-type.png
       06-glass-highlights.png
       AppName-Variant.icon
+      AppName.icon
       AppName-Variant-IconComposer-iOS-macOS-Default-1024.png
       AppName-Variant-IconComposer-watchOS-Default-1088.png
     Exports/
@@ -127,7 +128,12 @@ AppNameIcon/
         ...
 ```
 
-The `.icon` file is the preferred production handoff for Xcode. If a `.icon` package is not saved, the canonical review artifacts are the exported PNG masters named `*-IconComposer-*.png`.
+The variant-named `.icon` file is the design-source package. When copying an
+Icon Composer package into an Xcode app project, rename the package to the
+canonical app/product name, for example `CityCommuter.icon` instead of
+`CityCommuter-SingaporeTransitClean.icon`. If a `.icon` package is not saved,
+the canonical review artifacts are the exported PNG masters named
+`*-IconComposer-*.png`.
 
 ## Apple Xcode Guidance
 
@@ -135,6 +141,13 @@ Apple's current app icon documentation changes how to think about final delivery
 
 - Icon Composer creates a single multilayer `.icon` file that Xcode can use for iOS, iPadOS, macOS, watchOS, and App Store icon rendering.
 - Add the `.icon` file to the Xcode project bundle before building. In the target's General pane, the App Icon field must match the `.icon` filename without the extension.
+- For Xcode handoff, use a stable app-name `.icon` filename, not the design
+  variant name. Examples:
+  - Source/design package: `CityCommuter-SingaporeTransitClean.icon`
+  - Xcode project package: `CityCommuter.icon`
+  - Source/design package: `TailrCV-HopeWhite.icon`
+  - Xcode project package: `RoleFitCV.icon` or the exact product app name used
+    by the project
 - In current Xcode, an Icon Composer file can replace an existing `AppIcon` asset catalog for the app icon. Xcode can generate similar-looking assets for older OS releases from the `.icon` file. If an app must keep its previous icon on older OS releases, continue using asset catalogs.
 - A complete macOS asset-catalog icon set is still valid. Do not treat
   `AppIcon.appiconset` as wrong just because it is not Icon Composer; check
@@ -204,6 +217,8 @@ Apple's current app icon documentation changes how to think about final delivery
 
 6. Tune Icon Composer
    - Save the document as `SourceLayers/AppName-Variant.icon`.
+   - Also keep a handoff copy named `SourceLayers/AppName.icon` when the
+     package is intended to be copied into an Xcode project.
    - Use the Document inspector to keep only the supported platforms visible.
    - Organize layers into meaningful groups, with a practical maximum of four groups.
    - Check iOS/macOS and watchOS preview.
@@ -325,7 +340,12 @@ Key files:
 
 - Save `.icon` packages whenever possible, ideally beside source layers:
   - `SourceLayers/AppName-Variant.icon`
-- The `.icon` package is the production handoff for modern Xcode projects.
+- Keep variant names for design-source packages. Before adding a package to an
+  Xcode app target, copy/rename it to the canonical app name:
+  - `SourceLayers/AppName.icon`
+  - Xcode target App Icon setting: `AppName`
+- The app-name `.icon` package is the production handoff for modern Xcode
+  projects.
 - If the save flow is unreliable, do not block the work. Exported Icon Composer PNG masters remain the dependable visual deliverables and fallback source for resized PNG sets.
 - The current repo contains a saved `.icon` package for Native Mobile:
   - `NativeMobileIcon/ProjectThemeWhiteAccent/SourceLayers/Native Mobile.icon`
@@ -335,9 +355,15 @@ Key files:
 
 ## Xcode Handoff Checklist
 
-- Add the saved `.icon` file to the Xcode project.
+- Copy the approved `.icon` package into the Xcode project using the canonical
+  app name, for example `CityCommuter.icon`.
+- Do not add a variant-named package like
+  `CityCommuter-SingaporeTransitClean.icon` to the app target unless the user
+  explicitly wants that variant name in Xcode.
+- Add the app-name `.icon` file to the Xcode project.
 - In target settings, open General -> App Icons and Launch Screen.
-- Set App Icon to the `.icon` filename without `.icon`.
+- Set App Icon to the app-name `.icon` filename without `.icon`, for example
+  `CityCommuter`.
 - If the project still uses an asset catalog fallback, add the 1024 px master or explicit sizes as required by the target platform.
 - For App Store Connect, provide a 1024 x 1024 opaque PNG: no alpha channel and no transparent pixels.
 - Run on Simulator or device and verify Default, Dark, Mono/tinted, and watchOS appearances as applicable.
